@@ -1,6 +1,7 @@
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import RecommendedCarousel from '@/components/recommendations/RecommendedCarousel';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -35,6 +36,9 @@ export default function Home() {
             )}
           </div>
         </div>
+
+        {/* Recommended Models */}
+        <RecommendedCarousel />
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
