@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
 import { OrderStatus } from '@prisma/client';
+import { assignPrintJobs } from '@/lib/printJobs/assignment';
 
 // Disable body parser for this endpoint
 export const config = {
@@ -70,8 +71,14 @@ export default async function handler(
 
         console.log('Order marked as PAID:', orderId);
 
-        // TODO: Trigger print job creation (will be implemented in Prompt 6)
-        // await createPrintJobsForOrder(orderId);
+        // Trigger print job creation automatically
+        try {
+          const printJobs = await assignPrintJobs(orderId);
+          console.log(`Created ${printJobs.length} print jobs for order ${orderId}`);
+        } catch (jobError) {
+          console.error('Error creating print jobs:', jobError);
+          // Don't fail the webhook if print job creation fails
+        }
 
         // TODO: Send email notification (will be implemented in Prompt 9B)
         // await sendOrderConfirmationEmail(order);
