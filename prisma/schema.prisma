@@ -234,3 +234,14 @@ model Notification {
 
   @@map("notifications")
 }
+
+model ApiClient {
+  id        String   @id @default(uuid())
+  name      String
+  apiKey    String   @unique
+  email     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@map("api_clients")
+}
