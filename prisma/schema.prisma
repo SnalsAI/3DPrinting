@@ -162,8 +162,9 @@ model Order {
   updatedAt    DateTime    @updatedAt
 
   // Relations
-  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items OrderItem[]
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items   OrderItem[]
+  invoice Invoice?
 
   @@map("orders")
 }
@@ -244,4 +245,22 @@ model ApiClient {
   createdAt DateTime @default(now())
 
   @@map("api_clients")
+}
+
+model Invoice {
+  id             String   @id @default(uuid())
+  orderId        String   @unique
+  invoiceNumber  String   @unique
+  billingName    String
+  billingAddress Json     // { address, city, zip, country }
+  taxId          String?
+  amount         Decimal  @db.Decimal(10, 2)
+  currency       String   @default("USD")
+  issuedAt       DateTime @default(now())
+  pdfUrl         String?
+
+  // Relations
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
 }

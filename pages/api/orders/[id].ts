@@ -50,6 +50,7 @@ export default async function handler(
             email: true,
           },
         },
+        invoice: true,
       },
     });
 

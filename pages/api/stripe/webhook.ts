@@ -6,6 +6,7 @@ import prisma from '@/lib/prisma';
 import { OrderStatus } from '@prisma/client';
 import { assignPrintJobs } from '@/lib/printJobs/assignment';
 import { sendOrderConfirmationEmail } from '@/lib/notifications/notificationService';
+import { createInvoiceForOrder } from '@/lib/invoices/generator';
 
 // Disable body parser for this endpoint
 export const config = {
@@ -87,6 +88,15 @@ export default async function handler(
         } catch (emailError) {
           console.error('Error sending order confirmation:', emailError);
           // Don't fail the webhook if email fails
+        }
+
+        // Generate invoice automatically
+        try {
+          const invoice = await createInvoiceForOrder(orderId);
+          console.log(`Invoice ${invoice.invoiceNumber} generated for order ${orderId}`);
+        } catch (invoiceError) {
+          console.error('Error generating invoice:', invoiceError);
+          // Don't fail the webhook if invoice generation fails
         }
 
         break;

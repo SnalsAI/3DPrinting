@@ -199,6 +199,29 @@ export default function OrderDetailPage() {
                   <span>{formatCurrency(Number(order.totalAmount))}</span>
                 </div>
               </div>
+
+              {/* Invoice Link */}
+              {order.invoice && (
+                <div className="mt-6 pt-6 border-t">
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">Invoice</h3>
+                  <div className="space-y-2">
+                    <div className="text-sm text-gray-600">
+                      Invoice #{order.invoice.invoiceNumber}
+                    </div>
+                    {order.invoice.pdfUrl && (
+                      <a
+                        href={order.invoice.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition"
+                        download
+                      >
+                        📄 Download Invoice PDF
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Shipping Information */}
