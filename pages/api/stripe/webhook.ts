@@ -5,6 +5,7 @@ import { stripe } from '@/lib/stripe';
 import prisma from '@/lib/prisma';
 import { OrderStatus } from '@prisma/client';
 import { assignPrintJobs } from '@/lib/printJobs/assignment';
+import { sendOrderConfirmationEmail } from '@/lib/notifications/notificationService';
 
 // Disable body parser for this endpoint
 export const config = {
@@ -80,8 +81,13 @@ export default async function handler(
           // Don't fail the webhook if print job creation fails
         }
 
-        // TODO: Send email notification (will be implemented in Prompt 9B)
-        // await sendOrderConfirmationEmail(order);
+        // Send order confirmation email and notification
+        try {
+          await sendOrderConfirmationEmail(order);
+        } catch (emailError) {
+          console.error('Error sending order confirmation:', emailError);
+          // Don't fail the webhook if email fails
+        }
 
         break;
       }
