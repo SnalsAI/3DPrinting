@@ -1,6 +1,22 @@
 // Type definitions for the 3D Printing Platform
 
-import { User, Model3D, Customization, Order, OrderItem, PrintPartner, PrintJob, Role, OrderStatus, PrintStatus, MaterialType } from '@prisma/client';
+import {
+  User,
+  Model3D,
+  Customization,
+  Order,
+  OrderItem,
+  PrintPartner,
+  PrintJob,
+  Role,
+  OrderStatus,
+  PrintStatus,
+  MaterialType,
+  ProductType,
+  PaperType,
+  CuttingMachine,
+  OccasionType
+} from '@prisma/client';
 
 // Re-export Prisma types
 export type {
@@ -15,6 +31,10 @@ export type {
   OrderStatus,
   PrintStatus,
   MaterialType,
+  ProductType,
+  PaperType,
+  CuttingMachine,
+  OccasionType,
 };
 
 // Extended types with relations

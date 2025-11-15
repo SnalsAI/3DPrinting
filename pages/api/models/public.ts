@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '@/lib/prisma';
-import { MaterialType } from '@prisma/client';
+import { MaterialType, ProductType, OccasionType } from '@/types';
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,7 +11,7 @@ export default async function handler(
   }
 
   try {
-    const { search, material, maxColors } = req.query;
+    const { search, material, maxColors, productType, occasion } = req.query;
 
     // Build filter object
     const where: any = {
@@ -26,7 +26,19 @@ export default async function handler(
       ];
     }
 
-    // Material filter
+    // Product type filter
+    if (productType && typeof productType === 'string') {
+      where.productType = productType as ProductType;
+    }
+
+    // Occasion filter
+    if (occasion && typeof occasion === 'string') {
+      where.occasions = {
+        has: occasion as OccasionType,
+      };
+    }
+
+    // Material filter (only for 3D prints)
     if (material && typeof material === 'string') {
       where.availableMaterials = {
         has: material as MaterialType,

@@ -47,6 +47,51 @@ enum MaterialType {
   METAL_FILLED
 }
 
+enum ProductType {
+  THREE_D_PRINT
+  PAPER_CRAFT
+}
+
+enum PaperType {
+  CARDSTOCK
+  CONSTRUCTION_PAPER
+  KRAFT_PAPER
+  GLITTER_CARDSTOCK
+  VELLUM
+  VINYL
+  FOAM_SHEET
+  CORRUGATED_CARDBOARD
+}
+
+enum CuttingMachine {
+  CRICUT_MAKER
+  CRICUT_EXPLORE
+  SILHOUETTE_CAMEO
+  BROTHER_SCAN_N_CUT
+  GENERIC_PLOTTER
+}
+
+enum OccasionType {
+  BIRTHDAY
+  WEDDING
+  GRADUATION
+  CONFERENCE
+  TRADE_SHOW
+  CORPORATE_EVENT
+  BAPTISM
+  COMMUNION
+  CONFIRMATION
+  RELIGIOUS_CELEBRATION
+  ANNIVERSARY
+  BABY_SHOWER
+  PROMOTIONAL_GADGET
+  SEASONAL_HOLIDAY
+  CUSTOM_GIFT
+  SCHOOL_EVENT
+  SPORTS_EVENT
+  OTHER
+}
+
 // ========================================
 // MODELS
 // ========================================
@@ -113,18 +158,28 @@ model VerificationToken {
 }
 
 model Model3D {
-  id                  String         @id @default(uuid())
+  id                  String           @id @default(uuid())
   name                String
-  description         String         @db.Text
-  fileUrl             String
-  previewImageUrl     String?
+  description         String           @db.Text
+  productType         ProductType      @default(THREE_D_PRINT)
+  occasions           OccasionType[]
+
+  // 3D Print specific fields
+  fileUrl             String?
   availableMaterials  MaterialType[]
-  maxColors           Int            @default(1)
-  basePrice           Decimal        @default(0.00) @db.Decimal(10, 2)
-  isActive            Boolean        @default(true)
+
+  // Paper craft specific fields
+  paperTypes          PaperType[]
+  compatibleMachines  CuttingMachine[]
+
+  // Common fields
+  previewImageUrl     String?
+  maxColors           Int              @default(1)
+  basePrice           Decimal          @default(0.00) @db.Decimal(10, 2)
+  isActive            Boolean          @default(true)
   createdById         String
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
 
   // Relations
   createdBy      User            @relation(fields: [createdById], references: [id], onDelete: Cascade)
