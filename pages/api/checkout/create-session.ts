@@ -4,20 +4,35 @@ import { authOptions } from '../auth/[...nextauth]';
 import prisma from '@/lib/prisma';
 import { stripe } from '@/lib/stripe';
 import { OrderStatus } from '@prisma/client';
+import { logger } from '@/lib/logger';
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const timer = logger.startTimer('checkout-create-session');
+
   if (req.method !== 'POST') {
+    logger.warn('API', 'POST /api/checkout/create-session', 'Method not allowed', {
+      metadata: { method: req.method },
+    });
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     // Check authentication
     const session = await getServerSession(req, res, authOptions);
+    const userId = (session?.user as any)?.id;
+
+    logger.apiRequest('POST', '/api/checkout/create-session', userId, {
+      cartItemsCount: req.body?.cart?.length || 0,
+    });
 
     if (!session) {
+      logger.warn('AUTH', 'Checkout Unauthorized', 'User attempted checkout without authentication', {
+        ipAddress: req.headers['x-forwarded-for']?.toString() || req.socket.remoteAddress,
+        endpoint: '/api/checkout/create-session',
+      });
       return res.status(401).json({ error: 'Unauthorized. Please sign in.' });
     }
 
@@ -87,6 +102,11 @@ export default async function handler(
     }
 
     // Create order in database
+    logger.info('ORDER', 'Create Order', `Creating order for ${cart.length} items`, {
+      userId,
+      metadata: { itemsCount: cart.length, totalAmount },
+    });
+
     const order = await prisma.order.create({
       data: {
         userId: (session.user as any).id,
@@ -102,7 +122,17 @@ export default async function handler(
       },
     });
 
+    logger.orderEvent(order.id, 'Order Created', 'Order created successfully', userId, {
+      totalAmount,
+      itemsCount: order.items.length,
+    });
+
     // Create Stripe checkout session
+    logger.paymentEvent('Create Stripe Session', 'Creating Stripe checkout session', userId, {
+      orderId: order.id,
+      amount: totalAmount,
+    });
+
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: stripeLineItems,
@@ -117,6 +147,12 @@ export default async function handler(
       },
     });
 
+    logger.paymentEvent('Stripe Session Created', `Stripe session created: ${stripeSession.id}`, userId, {
+      orderId: order.id,
+      sessionId: stripeSession.id,
+      amount: totalAmount,
+    });
+
     // Update order with stripe session ID
     await prisma.order.update({
       where: { id: order.id },
@@ -124,6 +160,9 @@ export default async function handler(
         stripePaymentIntentId: stripeSession.id,
       },
     });
+
+    const duration = timer();
+    logger.apiResponse('POST', '/api/checkout/create-session', 200, duration, userId);
 
     return res.status(200).json({
       success: true,
@@ -134,6 +173,14 @@ export default async function handler(
       },
     });
   } catch (error) {
+    const duration = timer();
+    const userId = (await getServerSession(req, res, authOptions))?.user?.id;
+
+    logger.apiError('POST', '/api/checkout/create-session', error as Error, userId, {
+      cart: req.body?.cart,
+      shippingInfo: req.body?.shippingInfo,
+    });
+
     console.error('Error creating checkout session:', error);
     return res.status(500).json({
       error: 'Failed to create checkout session',

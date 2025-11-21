@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeTab: 'overview' | 'models' | 'orders' | 'print-jobs' | 'partners' | 'analytics';
+  activeTab?: 'overview' | 'models' | 'orders' | 'print-jobs' | 'partners' | 'analytics' | 'debug';
 }
 
 export default function AdminLayout({ children, activeTab }: AdminLayoutProps) {
@@ -17,6 +17,7 @@ export default function AdminLayout({ children, activeTab }: AdminLayoutProps) {
     { id: 'orders', name: 'Orders', href: '/admin/orders' },
     { id: 'print-jobs', name: 'Print Jobs', href: '/admin/print-jobs' },
     { id: 'partners', name: 'Partners', href: '/admin/partners' },
+    { id: 'debug', name: 'Debug', href: '/admin/debug' },
   ];
 
   return (

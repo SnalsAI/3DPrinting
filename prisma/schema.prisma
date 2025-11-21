@@ -264,3 +264,26 @@ model Invoice {
 
   @@map("invoices")
 }
+
+model DebugLog {
+  id          String   @id @default(uuid())
+  level       String   // "DEBUG", "INFO", "WARN", "ERROR"
+  category    String   // "API", "AUTH", "DATABASE", "PAYMENT", "EMAIL", "3D_RENDER", "AI", "NOTIFICATION", "SYSTEM"
+  action      String   // Action being performed
+  message     String   @db.Text
+  userId      String?
+  metadata    Json?    // Additional context data
+  error       String?  @db.Text
+  stackTrace  String?  @db.Text
+  ipAddress   String?
+  userAgent   String?
+  duration    Int?     // Duration in milliseconds
+  endpoint    String?  // API endpoint if applicable
+  createdAt   DateTime @default(now())
+
+  @@index([level])
+  @@index([category])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("debug_logs")
+}
